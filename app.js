@@ -30,25 +30,24 @@ const storage = multer.diskStorage({
 
   const upload = multer({ storage: storage })
   
-//variables
+//variables decalaration
 let clientSocketIds = [];
 let connectedUsers= [];
 let rooms=[];
-//SOCKETS
+//socket connection
 
 io.on('connection', socket => {
     var user = socket.handshake.query.username ;
-    console.log('A new user connected..',user);
+    console.log('user connected',user);
 
     socket.on('disconnect', () => {
-        console.log("A user disconnected..",user)
+        console.log("user disconnected.",user)
         connectedUsers = connectedUsers.filter(item => item.socketId != socket.id);
         io.emit('updateUserList', connectedUsers)
     });
 
     socket.on('loggedin', function(user) {
         clientSocketIds.push({socket: socket, userId:  user});
-        // connectedUsers = connectedUsers.filter(item => item.user_id != user.user_id);
         connectedUsers.push({user, socketId: socket.id})
         console.log('Connected users-',connectedUsers);
         console.log('Connected sockets-',clientSocketIds);
@@ -66,7 +65,7 @@ io.on('connection', socket => {
             rooms.push(data.room);
             socket.join(data.room);
         }        
-        io.emit('response',{mes:"Room Created successfully!"})
+        io.emit('response',{mes:"Room Created "})
         let withSocket = getSocketByUserId(data.withUser.user);
         socket.broadcast.to(withSocket.id).emit("invite",{room:data})
     });
@@ -99,20 +98,19 @@ io.on('connection', socket => {
             
             io.sockets.in(roomopts[0]).emit('newMessage', data);
         }
-        // else if(rooms.includes(roomopts[1])){
+      
             else{
             var msg = {
                 to:data.to,
                 from:data.from,
                 message:data.message,
                 image:data.image,
-                //date:new Date(),
                 room:roomopts[1],
                 isForwarded:data.isForwarded
             }
             var msg=Messagedata(msg);
             msg.save();
-            console.log('Saving Message')
+            
             
             io.sockets.in(roomopts[1]).emit('newMessage', data);
         }
@@ -120,8 +118,8 @@ io.on('connection', socket => {
        
     })
 });
-//functions
 
+// functioning
 const getSocketByUserId = (userId) =>{
     let socket = '';
     for(let i = 0; i<clientSocketIds.length; i++) {
@@ -141,12 +139,12 @@ app.use('/user',authRouter);
 app.use('/msg',msgRouter); 
 
 app.get('/', function (req,res){
-    res.send('Hello from server');
+    res.send(' server connected');
 })
 
 app.post('/file', upload.single('file'), (req, res, next) => {
     const file = req.file;
-    console.log('Uploading file..',file.filename);
+    console.log('Uploading file',file.filename);
     if (!file) {
       const error = new Error('No File')
       error.httpStatusCode = 400
@@ -158,4 +156,4 @@ app.post('/file', upload.single('file'), (req, res, next) => {
 
 const PORT = 3000 || process.env.PORT;
 
-server.listen(PORT,() => console.log(`Server running on port ${PORT}`));
+server.listen(PORT,() => console.log(`Server listening on port ${PORT}`));

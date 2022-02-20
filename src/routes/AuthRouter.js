@@ -11,7 +11,7 @@ function router() {
        console.log(req.body);
        let userData = req.body;
 
-       //Verify is email/chatHadndle is already registered 
+      //username verification
        
        Userdata.count({ username:userData.username}) 
        .then((count) => { 
@@ -57,7 +57,7 @@ function router() {
            console.log("User ID - ",id);
            if(user.password == password)
            {           
-             // res.status(200).send({"message": "Valid User"});
+            
             let payload = {subject: username + password};
             let token = jwt.sign(payload,'secretKey');
             res.status(200).send({token,id});
@@ -67,7 +67,7 @@ function router() {
               }
       })
       .catch( ()=> {
-              res.status(404).send({"message": "User not found! Please SIGN UP!"});
+              res.status(404).send({"message": "User not found"});
     });
 
   })
@@ -87,30 +87,18 @@ authRouter.post('/searchUser',function (req,res){
     const username=req.body.username;
     Userdata.find( { "username": { $regex:`${username}`, $options: "i" } })
        .then((users)=>{
-         console.log('Users..',users);
+        //  console.log('Users..',users);
          res.send(users);
        })
     
 })
-
-//change DP
-authRouter.post('/changeDP/:id',function (req,res){
-  const id = req.params.id;
-  console.log('Updating - ', req.body);
-  var update = Userdata.findByIdAndUpdate(id,{
-    image:req.body.image
-  });
-   update.exec(function (err,data){
-    res.status(200).send(data);
-   })
-  });
 
   //add contact
 
 
   authRouter.post('/addContact/:id',function (req,res){
     const id = req.params.id;
-    console.log('Updating - ', req.body);
+    // console.log('Updating - ', req.body);
     var contact={
       name:req.body.username,
       image:req.body.image,
